@@ -1,0 +1,18 @@
+# Credentials and environment configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials
+.aws/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local files
+.vscode/
+.DS_Store
