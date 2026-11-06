@@ -2,6 +2,14 @@
 
 ![ServiceNow](https://img.shields.io/badge/ServiceNow-Workflow%20Automation-2E8B57) ![AWS](https://img.shields.io/badge/AWS-Serverless-FF9900) ![Status](https://img.shields.io/badge/Mode-Validation%20Only-blue)
 
+## Highlights
+
+- **Approval-controlled workflow:** ServiceNow catalog requests pass through approval before the AWS validation call.
+- **Authenticated integration:** ServiceNow REST Message communicates with API Gateway through a Lambda authorizer.
+- **Safe execution:** The AWS backend runs in validation-only mode; no EC2 instances are created.
+- **Traceability:** The design connects AWS validation responses to ServiceNow Requested Item tracking.
+- **Inspectable implementation:** Python Lambda handlers, ServiceNow JavaScript, diagrams, and test evidence are included.
+
 ## Overview
 
 An approval-driven ServiceNow–AWS integration that accepts EC2 requests through a Service Catalog item, routes them through an approval workflow, and securely submits approved requests to an AWS serverless API for validation. The API returns a structured response that can be recorded against the ServiceNow Requested Item (RITM).
@@ -113,24 +121,41 @@ Example successful validation response observed during testing:
 
 The screenshot filenames above are **placeholders** until real, sanitized evidence is added. Do not claim unexecuted tests have passed.
 
-## Screenshots
+## Implementation and Evidence
 
-Add your own sanitized screenshots to the `screenshots/` folder, then uncomment these lines after each file exists:
+The integration has returned **HTTP 200** with `status: validated`, `dry_run: true`, and `instance_created: false`. Screenshots demonstrate the catalog, request, approval, workflow, REST configuration, response, and RITM notes. The end-to-end approval gate and negative security tests should be independently verified before describing them as fully tested.
 
-<!-- ![Service Catalog request](screenshots/01-service-catalog.png) -->
-<!-- ![Submitted RITM](screenshots/02-requested-item.png) -->
-<!-- ![Approval](screenshots/03-approval.png) -->
-<!-- ![Flow Designer](screenshots/04-flow-designer.png) -->
-<!-- ![REST Message](screenshots/05-rest-message.png) -->
-<!-- ![Successful API response](screenshots/06-api-response.png) -->
-<!-- ![RITM work notes](screenshots/07-ritm-work-notes.png) -->
-<!-- ![CloudWatch logs](screenshots/08-cloudwatch.png) -->
+### Project screenshots
+
+| Evidence | Screenshot |
+|---|---|
+| Service Catalog request | ![Service Catalog request](screenshots/01-service-catalog.png) |
+| Requested Item | ![Requested Item](screenshots/02-requested-item.png) |
+| Approval record | ![Approval record](screenshots/03-approval.png) |
+| Flow Designer workflow | ![Flow Designer](screenshots/04-flow-designer.png) |
+| REST Message | ![REST Message](screenshots/05-rest-message.png) |
+| Successful validation response | ![HTTP 200 validation response](screenshots/06-api-response.png) |
+| RITM work notes | ![RITM work notes](screenshots/07-ritm-work-notes.png) |
+
+## Source Code
+
+| File | Purpose |
+|---|---|
+| [EC2 validation Lambda](aws/ec2_validation_lambda.py) | Validates incoming EC2 requests in dry-run mode |
+| [Lambda authorizer](aws/lambda_authorizer.py) | Authenticates requests before backend invocation |
+| [ServiceNow custom action](servicenow/validate_ec2_request.js) | Builds and sends the REST request, handles response outputs |
 
 ## Repository Structure
 
 ```text
 servicenow-aws-ec2-request-automation/
 ├── README.md
+├── .gitignore
+├── aws/
+│   ├── ec2_validation_lambda.py
+│   └── lambda_authorizer.py
+├── servicenow/
+│   └── validate_ec2_request.js
 ├── docs/
 │   ├── architecture.svg
 │   └── setup-and-testing.md
@@ -141,11 +166,8 @@ servicenow-aws-ec2-request-automation/
     ├── 04-flow-designer.png
     ├── 05-rest-message.png
     ├── 06-api-response.png
-    ├── 07-ritm-work-notes.png
-    └── 08-cloudwatch.png
+    └── 07-ritm-work-notes.png
 ```
-
-Add sanitized source exports in dedicated `servicenow/` and `aws/` folders only after reviewing them for secrets and account-specific data.
 
 ## Setup and Reproduction
 
@@ -166,10 +188,12 @@ See [Setup and testing guide](docs/setup-and-testing.md). This is a project demo
 - Add idempotency and retry handling to prevent duplicate actions.
 - Implement richer request status transitions and monitoring alerts.
 
-## Project Status
+## Implementation Status
 
-**Phase 4 integration workflow completed; Phase 5 documentation and evidence collection in progress.** Current demonstrated AWS response is validation-only (`instance_created: false`).
+**Working ServiceNow-to-AWS request validation integration.** The demonstrated response confirms successful validation without creating EC2 resources (`instance_created: false`). Actual EC2 provisioning is intentionally out of scope.
 
 ## Author
 
-Built as a hands-on ServiceNow and AWS cloud integration portfolio project.
+**Ayush Kamble**  
+ServiceNow Developer | AWS Cloud & Automation  
+GitHub: [@Aayush024](https://github.com/Aayush024)
